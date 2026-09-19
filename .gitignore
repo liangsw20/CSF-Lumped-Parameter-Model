@@ -1,0 +1,8 @@
+﻿# runtime outputs / caches (regenerable, keep out of VCS)
+Results/
+*.slxc
+*.slxc.*
+slprj/
+*.asv
+*.m~
+__pycache__/

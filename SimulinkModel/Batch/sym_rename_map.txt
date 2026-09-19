@@ -1,0 +1,75 @@
+# sym_rename_map.txt -- single source of truth for the symbol unification.
+#
+# columns (TAB separated): old <TAB> new <TAB> kind <TAB> note
+#   kind: SIG = signal / line name / Goto tag / logged label
+#         PAR = base-workspace parameter
+#         SUB = subsystem (block) display name
+# Consumers: Batch/rename_symbols.m   (rewrites CSF_Model.slx),
+#            Batch/rename_text.ps1    (rewrites *.m and Results/*.csv),
+#            Batch/relabel_results.m  (rewrites the labels inside Results/*.mat),
+#            Batch/check_symbols.m    (pre-flight: no old symbol may survive).
+# NEVER edit one consumer only: add rows here.
+#
+# Reference: Latex paper "Methods" (finalised).  Paper symbol -> model symbol is
+# the inverse of this table.
+#
+# WARNING -- the appliers are NOT idempotent.  Two rows form a cycle
+# (E_Afree -> E_A0, E_A0 -> E_A_ref), so running rename_symbols twice would move
+# E_A0 on to E_A_ref.  rename_symbols.m refuses to run on an already-renamed
+# model; check_symbols.m verifies the result.  The same applies to relabel_results
+# on a dataset that already carries the new names.
+
+# ---------------------------------------------------------------- flows
+Q_vSAS	Q_SASE	SIG	flow along the cortical surface SAS -> SASE
+P_vSAS	P_SASE	SIG	SASE (volume-less junction) node pressure
+Q_VCSF	Q_SSS	SIG	arachnoid granulations -> superior sagittal sinus
+Q_LCSF	Q_OLS	SIG	cribriform plate -> olfactory lymphatic system
+Q_SCSF	Q_SLS	SIG	spinal nerve roots -> spinal lymphatic system
+Q_aCSF	Q_PAS	SIG	SAS -> para-arterial space (same signal as SAS/Q_PAS)
+Q_vPVS	Q_PNS	SIG	PNS -> SASE
+Q_PVS	Q_PCS	SIG	PAS -> PVS, the paravascular route (PCS pathway retained)
+Q_M	Q_ICS	SIG	ICS -> ECS osmotic exchange
+Q_SAS_in	Q_SAS	SIG	CMC junction -> cranial SAS
+TotalOut	Q_out	SIG	windowed mean of Q_SSS + Q_OLS + Q_SLS
+meanQ_LCSF	meanQ_OLS	SIG	windowed mean of Q_OLS
+meanQ_VCSF	meanQ_SSS	SIG	windowed mean of Q_SSS
+meanQ_SCSF	meanQ_SLS	SIG	windowed mean of Q_SLS
+meanQBBB	meanQ_BBB	SIG	windowed mean of Q_BBB
+pct_Q_LCSF	pct_Q_OLS	SIG	outflow share of the olfactory lymphatic pathway
+pct_Q_SCSF	pct_Q_SLS	SIG	outflow share of the spinal lymphatic pathway
+pct_Q_VCSF	pct_Q_SSS	SIG	outflow share of the superior sagittal sinus pathway
+Q_GSin	Q_GS	SIG	PAS -> ECS flow across the interstitial-endfeet gap
+Q_GSout	Q_ECS	SIG	ECS -> para-venous space outflow
+meanGSin	meanQ_GS	SIG	one-cycle moving average of Q_GS
+meanGSout	meanQ_ECS	SIG	one-cycle moving average of Q_ECS
+# --------------------------------------------------------- volumes/pressures
+V_TOT	V_T	SIG	total intracranial volume (paper Eq. V_T)
+P_vPVS	P_PNS	SIG	para-venous space pressure
+V_vPVS	V_PNS	SIG	para-venous space volume
+P_OS_ECS	pi_ECS	SIG	ECS colloid osmotic pressure
+P_os_ECS	pi_ECS	SIG	ECS colloid osmotic pressure (ICS subsystem alias)
+P_OS_C	pi_C	SIG	capillary colloid osmotic pressure
+V_BR	V_brain	SIG	brain volume carried into V_T (= V_ECS + V_BT)
+# -------------------------------------------------------------- parameters
+V_vPVS0	V_PNS0	PAR	initial PNS volume
+R_vPVS	R_PNS	PAR	venous PVS resistance
+R_aIEG	R_IEGL	PAR	PAS<->ECS (IEG) resistance, open branch
+R_vIEG	R_IEGH	PAR	PAS<->ECS (IEG) resistance, closed branch (2 x R_IEGL)
+R_gaps	R_PCS	PAR	PAS -> PVS resistance of the paravascular route
+R_crib	R_CP	PAR	cribriform plate resistance
+P_crib	P_OLS	PAR	olfactory lymphatic outlet pressure
+P_SN	P_SLS	PAR	spinal lymphatic outlet pressure
+R_VEN0_base	R_VEN_base	PAR	baseline ventriculo-SAS resistance
+R_VEN0	R_VEN	PAR	ventriculo-SAS (aqueduct) resistance
+E_VEN0	E_VEN	PAR	ventricular elastance
+E_SAS0	E_SAS	PAR	SAS elastance
+Pos_col_C0	pi_C0	PAR	initial capillary colloid osmotic pressure
+Pos_col_ECS0	pi_ECS0	PAR	initial ECS colloid osmotic pressure
+V_BRs	V_BT_solid	PAR	solid (non-water) brain-tissue volume
+V_BR0	V_brain0	PAR	brain incl. ECS, excl. PVS (derivation helper)
+E_Afree	E_A0	PAR	arterial elastance at zero pressure (paper E_A0)
+E_A0	E_A_ref	PAR	arterial elastance at the calibration pressure
+V_TOT0	V_T0	PAR	initial total intracranial volume
+# ------------------------------------------------------------- subsystems
+vPVS	PNS	SUB	para-venous space subsystem
+vSAS	SASE	SUB	SAS-end junction subsystem
