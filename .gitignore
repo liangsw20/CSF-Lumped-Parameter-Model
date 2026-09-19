@@ -1,5 +1,5 @@
-﻿# runtime outputs / caches (regenerable, keep out of VCS)
-Results/
+# runtime outputs / caches (regenerable, keep out of VCS)
+SimulinkModel/Results/
 *.slxc
 *.slxc.*
 slprj/
